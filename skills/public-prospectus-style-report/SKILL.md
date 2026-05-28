@@ -33,6 +33,15 @@ like a data-request memo. Evidence gaps control what facts can be stated; they
 do not justify `XXX`, filler paragraphs, or repeated "need more data" prose in
 the body.
 
+When the user provides a formal reference report and asks to imitate it, the
+reference report becomes the structural and visual master. Preserve its front
+matter, table of contents, definition section, chapter hierarchy, page rhythm,
+font/table style, caption conventions, and investment-analysis posture unless
+the user explicitly asks to simplify. The report body must be written from the
+report preparer's point of view; never mention the prompt, the skill, the act of
+copying a reference report, or phrases such as "不使用正式报告中的资料" inside the
+deliverable.
+
 ## Workflow
 
 0. **Classify the input evidence first**
@@ -49,8 +58,12 @@ the body.
 0a. **If a formal reference report is available, build its style blueprint**
    - Extract the reference report's chapter order, paragraph roles, table/figure
      inventory, caption style, source-marker style, and risk/control wording.
-   - Replicate the form: section rhythm, table density, figure density, formal
-     Chinese disclosure tone, source captions, and Word layout.
+   - Replicate the form: front matter, table of contents, definition section,
+     chapter rhythm, table density, figure density, formal Chinese disclosure
+     tone, source captions, font choices, table borders, and Word layout.
+   - If the reference report includes `重要声明`, `重大事项提示`, `目录`, `释义`,
+     or a source/appendix-style closing section, keep analogous sections in the
+     same order. These sections are not optional in reference-replica mode.
    - Do not copy confidential facts from the reference as facts about the new
      target. Fill each analogous slot only with evidence from the new target or
      public sources. If a slot has no evidence, omit or merge it instead of
@@ -95,12 +108,16 @@ the body.
      names.
 
 6. **Write the report**
-   - Use prospectus-style section names, but do **not** add standalone preface
-     chapters such as `重要提示`, `重要声明`, `报告边界`, `使用说明`, or `附录`.
-     They are not useful for this diligence deliverable.
-   - Preserve the prospectus disclosure logic inside the leader's four modules.
-     Do not expand the output into a full IPO prospectus chapter list unless the
-     user explicitly asks for a full-chapter simulation.
+   - If no formal reference report is provided, use prospectus-style section
+     names without adding decorative or empty preface chapters.
+   - If a formal reference report is provided and the user asks to imitate it,
+     follow the reference report's actual structure first, including front
+     matter and full chapter list. The leader's four modules are then the
+     analytical logic behind the chapters, not necessarily the visible headings.
+   - For ordinary primary-market reports, preserve the prospectus disclosure
+     logic inside the leader's four modules. Do not expand the output into a
+     full IPO prospectus chapter list unless the user explicitly asks for a
+     full-chapter simulation or provides a formal report to replicate.
    - Mark every target-specific claim with source type and confidence.
    - Put a source marker next to every quantitative claim, technical parameter,
      market size, growth rate, customer concentration, investment amount, or
@@ -133,6 +150,10 @@ the body.
    - The formal deliverable must be a `.docx` that visually follows a China
      A-share prospectus-like report structure: cover title, numbered chapters,
      compact black headings, formal Chinese body text, and bordered tables.
+   - In reference-replica mode, use the reference DOCX itself as the style
+     master when possible. Preserve page setup, heading styles, body font,
+     paragraph spacing, table borders, table shading, figure captions, and table
+     captions. Do not invent a new visual system.
    - Use `scripts/build_prospectus_style_docx.py` whenever code execution is
      available. Do not deliver the Markdown draft as the final report unless
      DOCX generation is impossible.
@@ -141,8 +162,10 @@ the body.
 
 8. **Quality gate**
    - Do not include issuer/director/sponsor/auditor/lawyer declarations.
-   - Do not include `重要提示`, `重大事项提示`, `重要声明`, `报告边界`, `使用说明`,
-     `附录`, or similar meta/preface sections in the formal report.
+   - Do not include decorative `重要提示`, `重大事项提示`, `重要声明`, `报告边界`,
+     `使用说明`, `附录`, or similar meta/preface sections when no formal
+     reference report contains them. In reference-replica mode, preserve the
+     reference front matter and closing sections instead of deleting them.
    - Do not state audited financials unless the target has audited statements.
    - Do not invent shareholders, related parties, customers, suppliers, patents,
      or financial tables.
@@ -155,10 +178,13 @@ the body.
      express them as `待核验事项` tied to the relevant evidence gap.
    - Before DOCX generation, check that Markdown syntax does not remain visible
      in rendered tables, bullets, captions, or paragraphs.
-   - Before DOCX generation, run `scripts/audit_four_module_report.py` on the
-     Markdown draft to catch drift into a full IPO prospectus structure.
-     Use `--strict` for formal deliverables so placeholders, vague unsupported
-     language, unreferenced data, and figure source omissions fail the build.
+   - Before DOCX generation in four-module mode, run
+     `scripts/audit_four_module_report.py` on the Markdown draft to catch drift
+     into a full IPO prospectus structure. Use `--strict` for formal
+     deliverables so placeholders, vague unsupported language, unreferenced
+     data, and figure source omissions fail the build. In reference-replica
+     mode, run the audit with `--reference-replica` or use a separate structural
+     comparison against the reference report.
    - In strict mode, also audit figures and tables. A formal industrial project
      report should normally contain figures/tables that cover industry route,
      industry chain, product form, process, investment, finance, comparables,
@@ -190,6 +216,11 @@ evidence gaps in the final chapter of the report. Do not create a separate
 replication gap matrix is an evidence-control artifact.
 
 ## Default Four-Module Structure
+
+Use this only when the user asks for the leader's four-module deliverable or
+does not provide a formal report to replicate. If the user provides a formal
+report and asks to copy its structure/style, the reference report structure
+overrides this section.
 
 Use this default order for primary-market project reports. The report should be
 organized around the leader's four modules, while each module borrows the
@@ -236,11 +267,14 @@ or `项目公司（拟设）`, and clearly mark that there is no formal issuer.
 
 - A4 portrait unless the tables require landscape.
 - Cover title centered in black, Chinese font, bold, no decorative color blocks.
-- Main headings use the leader's module numbering such as `一、行业情况`.
+- In reference-replica mode, main headings use the reference report's exact
+  heading hierarchy and numbering.
+- In default four-module mode, main headings use the leader's module numbering
+  such as `一、行业情况`.
 - Use compact, formal body text; avoid marketing-style hero pages, disclaimers,
-  process notes, and appendix labels.
+  process notes, and tool/self-reference language.
 - Tables use black or light-gray borders, white header cells, and no dark color
-  fills.
+  fills unless the reference report uses a different formal table style.
 - Source markers in tables/figure captions are acceptable when all rows share
   the same source; otherwise mark the individual row or data cell.
 - The final section must contain two tables: `资料来源清单` and `待核验事项清单`.

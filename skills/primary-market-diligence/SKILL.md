@@ -12,9 +12,32 @@ Use this skill for一级市场新项目研究, not for ordinary public-company e
 
 Do not treat company BP or PR as fact. Convert every important claim into a verifiable claim with source, evidence level, missing proof, and impact on investment terms.
 
+The skill's differentiator is not that it can write a polished report. Its differentiator is evidence management. Every important report conclusion must be traceable to a `主张-证据-结论` chain:
+
+- `主张`: the original BP/PPT/interview/company-material claim, with page number or material reference when available.
+- `证据`: company-provided evidence, external/public evidence, evidence level, and any contradiction or口径差异.
+- `结论`: the strongest conclusion currently supported by the evidence, plus what cannot yet be concluded.
+
+If a conclusion cannot be linked back to original project claims, internal materials, external sources, and evidence strength, do not state it as a report conclusion. Convert it into a follow-up question, risk item, staged-funding condition, or veto/stop item.
+
 Use招股书/年报/公告 as high-quality public references for structure and comparables, but do not mechanically write a prospectus. Private-market targets often lack formal disclosure; internal company materials after NDA are usually the decisive evidence.
 
 For Feishu group delivery, keep execution silent until the result is ready. Do not narrate parser choices, package installs, command failures, OCR attempts, web-search attempts, or internal retries into the group chat. Only send the final useful outcome, the `.docx` attachment, or one concise blocking question.
+
+## Vertical Diligence Memory
+
+Do not market generic "agent memory" as the product value. General coding agents can also remember repository conventions and workflow habits. This skill should use and build a vertical diligence memory layer when the runtime supports durable memory, and otherwise preserve a local reusable note for the institution.
+
+Before drafting major deliverables, check available institution/project memory for:
+
+- past projects in the same industry, business model, transaction type, or local-government cooperation pattern;
+- trusted data sources, commonly used industry reports, and sources previously considered weak or promotional;
+- recurring fraud/overstatement patterns, such as inflated TAM, unsigned orders, trial customers counted as paying customers, unsupported margin expansion, policy subsidy dependence, unclear IP ownership, or capacity claims without equipment/permit support;
+- the institution's preferred report structure, leadership reading habits, recurring must-ask questions, and usual red-flag treatment rules.
+
+After a meaningful diligence run, record reusable non-secret lessons: industry-specific red flags, evidence that proved decisive, sources that were useful, questions that should become templates, and any leadership format preference discovered during the work. Do not store confidential raw client documents, secrets, account details, or private personal data in durable memory.
+
+When durable memory is unavailable, create or update a local `institution_memory_notes.md` in the working directory with the same non-secret reusable lessons.
 
 ## Feishu Attachment Recovery
 
@@ -64,6 +87,10 @@ modules plus a final evidence section:
    - Identify target company/project/new direction.
    - Identify transaction purpose: investment,增资, JV, M&A, government cooperation, or strategic partnership.
    - Build an input map: public sources, internal materials, interviews, third-party evidence, missing items.
+   - Check institution/project memory for prior similar projects, trusted sources,
+     common red flags, preferred report structure, and recurring must-ask
+     questions. Use this memory as context, not as evidence for the current
+     target.
    - If the only target-specific material is a BP/PPT/招商材料, run a PPT-only
      evidence pass before writing: page evidence index, visual asset inventory,
      and a gap matrix that separates `PPT事实`, `PPT可推断`, `需外部搜索`, and
@@ -91,6 +118,25 @@ modules plus a final evidence section:
 4. **Build claim table**
    - For each key claim: claim, source, importance, required evidence, public cross-check, current evidence level, investment impact if unverified.
    - Claims with weak evidence must become follow-up questions, risk items, or closing conditions.
+   - Build a `主张-证据-结论三元组` matrix for every material report conclusion:
+     original project claim, company evidence, external evidence, evidence
+     strength, supported conclusion, unsupported overclaim, and next action.
+   - Do not let a conclusion enter the report body unless it appears in this
+     matrix or is a direct synthesis of items in the matrix.
+
+4a. **Generate automatic follow-up questions**
+   - After each material intake or company reply, produce a follow-up list that
+     explicitly separates:
+     - missing materials;
+     - internal contradictions between company materials;
+     - claims supported only by company-side evidence;
+     - data口径 inconsistencies between BP, financial model, contracts, and
+       public sources;
+     - second-round questions that should be sent to the company.
+   - Each follow-up question must map to `证明什么`, `需要什么材料`, `外部验证来源`,
+     and `影响哪个投资判断`.
+   - Prefer red-flag and second-round question lists before a polished report
+     when the user or leader needs a quick decision.
 
 5. **Write modules**
    - Industry module mainly from public sources.
@@ -105,6 +151,9 @@ modules plus a final evidence section:
 
 6. **Quality gate**
    - Every major conclusion must have evidence or be explicitly marked unverified.
+   - Every major conclusion must link back to the `主张-证据-结论三元组`.
+   - Every material weak claim must have a follow-up question, risk item,
+     condition precedent, or stated reason for no further action.
    - Separate facts, company claims, analyst judgments, and assumptions.
    - Identify manual escalation needs: customer calls, site visit, legal, finance, technical expert, environmental/export-control review.
    - For formal prospectus-style reports, require visual evidence: product or
@@ -254,6 +303,14 @@ Use bundled files when useful:
 
 - Write in investor-facing Chinese by default.
 - Use tables for claims, sources, comparables, risks, and milestones.
+- For substantive work, produce or maintain a claim-evidence-conclusion matrix.
+  The final report may be shorter, but the evidence chain must exist.
+- For company replies or supplemental materials, produce automatic follow-up
+  questions covering missing materials, contradictions, single-sided evidence,
+  data口径 differences, and second-round questions.
+- Use institutional memory as a vertical diligence aid, not as current-project
+  evidence. If memory suggests a red flag, still verify it against current
+  materials and sources.
 - Formal report正文 must be evidence-gated: no `XXX`, `xx`, `待补充`,
   `此处可写`, `可能需要补充资料`, or similar template/placeholder wording.
   If evidence is absent, either omit the unsupported claim or state the exact

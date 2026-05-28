@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Audit a prospectus-style report draft for the leader's four-module structure."""
+"""Audit a prospectus-style report draft.
+
+Default mode enforces the leader's four-module structure. Reference-replica mode
+keeps evidence-quality checks but does not reject front matter, TOC, definitions,
+or full formal-report chapter structures copied from a supplied reference report.
+"""
 
 from __future__ import annotations
 
@@ -78,7 +83,7 @@ def collect_headings(text: str) -> list[tuple[int, int, str]]:
     return headings
 
 
-def audit(path: Path, strict: bool = False) -> dict:
+def audit(path: Path, strict: bool = False, reference_replica: bool = False) -> dict:
     text = path.read_text(encoding="utf-8")
     headings = collect_headings(text)
     errors: list[str] = []
@@ -86,15 +91,16 @@ def audit(path: Path, strict: bool = False) -> dict:
 
     h2 = [(line, title) for line, level, title in headings if level == 2]
     actual = [title for _, title in h2]
-    if actual[: len(EXPECTED)] != EXPECTED:
-        errors.append(f"Top-level H2 headings must start exactly as {EXPECTED}; got {actual}")
-    if len(actual) != len(EXPECTED):
-        errors.append(f"Expected exactly {len(EXPECTED)} top-level H2 headings; got {len(actual)}")
+    if not reference_replica:
+        if actual[: len(EXPECTED)] != EXPECTED:
+            errors.append(f"Top-level H2 headings must start exactly as {EXPECTED}; got {actual}")
+        if len(actual) != len(EXPECTED):
+            errors.append(f"Expected exactly {len(EXPECTED)} top-level H2 headings; got {len(actual)}")
 
-    for lineno, _level, title in headings:
-        for forbidden in FORBIDDEN_HEADINGS:
-            if forbidden in title:
-                errors.append(f"Forbidden heading at line {lineno}: {title}")
+        for lineno, _level, title in headings:
+            for forbidden in FORBIDDEN_HEADINGS:
+                if forbidden in title:
+                    errors.append(f"Forbidden heading at line {lineno}: {title}")
 
     for lineno, line in enumerate(text.splitlines(), 1):
         for forbidden in FORBIDDEN_BODY_TERMS:
@@ -102,16 +108,17 @@ def audit(path: Path, strict: bool = False) -> dict:
                 errors.append(f"Forbidden report body term at line {lineno}: {forbidden}")
 
     final_start = None
-    for lineno, title in h2:
-        if title == "资料来源与待核验事项":
-            final_start = lineno
-            break
-    if final_start is None:
-        errors.append("Missing final section: 资料来源与待核验事项")
-    else:
-        for lineno, level, title in headings:
-            if lineno < final_start and level <= 3 and ("资料来源" in title or "待核验" in title):
-                errors.append(f"Source/gap heading appears before final section at line {lineno}: {title}")
+    if not reference_replica:
+        for lineno, title in h2:
+            if title == "资料来源与待核验事项":
+                final_start = lineno
+                break
+        if final_start is None:
+            errors.append("Missing final section: 资料来源与待核验事项")
+        else:
+            for lineno, level, title in headings:
+                if lineno < final_start and level <= 3 and ("资料来源" in title or "待核验" in title):
+                    errors.append(f"Source/gap heading appears before final section at line {lineno}: {title}")
 
     if strict:
         for lineno, raw in enumerate(text.splitlines(), 1):
@@ -122,22 +129,23 @@ def audit(path: Path, strict: bool = False) -> dict:
                 if pattern.search(raw):
                     errors.append(f"Forbidden {label} at line {lineno}: {raw.strip()[:90]}")
 
-        by_section: dict[str, list[str]] = {key: [] for key in STRICT_SUBHEADINGS}
-        current = None
-        for _lineno, level, title in headings:
-            if level == 2 and title in by_section:
-                current = title
-            elif level == 3 and current:
-                by_section[current].append(title)
-        for section, required in STRICT_SUBHEADINGS.items():
-            joined = " ".join(by_section.get(section, []))
-            for item in required:
-                if item not in joined:
-                    errors.append(f"Missing subheading containing `{item}` under `{section}`")
+        if not reference_replica:
+            by_section: dict[str, list[str]] = {key: [] for key in STRICT_SUBHEADINGS}
+            current = None
+            for _lineno, level, title in headings:
+                if level == 2 and title in by_section:
+                    current = title
+                elif level == 3 and current:
+                    by_section[current].append(title)
+            for section, required in STRICT_SUBHEADINGS.items():
+                joined = " ".join(by_section.get(section, []))
+                for item in required:
+                    if item not in joined:
+                        errors.append(f"Missing subheading containing `{item}` under `{section}`")
 
-        citation_count = len(CITATION_RE.findall(text))
-        if citation_count < 18:
-            errors.append(f"Expected at least 18 inline source markers in strict mode; got {citation_count}")
+            citation_count = len(CITATION_RE.findall(text))
+            if citation_count < 18:
+                errors.append(f"Expected at least 18 inline source markers in strict mode; got {citation_count}")
 
         figure_count = 0
         for lineno, raw in enumerate(text.splitlines(), 1):
@@ -198,9 +206,13 @@ def main() -> None:
     parser.add_argument("draft", help="Markdown report draft")
     parser.add_argument("--strict", action="store_true", help="Require expected subheadings")
     parser.add_argument("--json", action="store_true", help="Print JSON result")
+    parser.add_argument(
+        "--reference-replica",
+        action="store_true",
+        help="Allow formal reference report structure/front matter instead of four-module headings",
+    )
     args = parser.parse_args()
-
-    result = audit(Path(args.draft), strict=args.strict)
+    result = audit(Path(args.draft), strict=args.strict, reference_replica=args.reference_replica)
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:

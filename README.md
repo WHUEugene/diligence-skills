@@ -1,6 +1,25 @@
 # 实习尽调小D Skill Pack
 
-这是「实习尽调小D」/ 一级市场尽调 skill 包，用于把项目 BP、PPT、PDF、公开资料和内部访谈材料转成可交付的尽调清单、四模块类招股书报告、投资判断和风控条件。
+这是「实习尽调小D」/ 一级市场尽调 skill 包。它不是把项目 BP、PPT、PDF、公开资料和访谈材料直接改写成一篇“AI 尽调报告”，而是把材料先转成可追溯的证据管理系统：主张拆解、证据分级、自动追问、风险红旗、四模块类招股书报告、投资判断和风控条件。
+
+## Core Differentiation
+
+普通 AI 工具通常会总结文档、回答问题、生成报告。这个 skill 包的定位更垂直：尽调不是文学写作，尽调的本质是证据管理。
+
+1. **主张-证据-结论三元组**
+   - 每一个重要报告结论都必须能回到原始 PPT/BP 主张、企业材料、外部资料和证据强度。
+   - 报告正文只写证据支持到的程度；没有证据支撑的内容进入待核验事项、追问清单、分期出资条件或否决项。
+   - 输出不只是一篇报告，而是一套 claim -> evidence -> conclusion 的可追溯链条。
+
+2. **自动生成追问**
+   - 项目方补材料后，AI 不只是总结新增材料，而是判断哪些材料缺失、哪些材料互相矛盾、哪些结论只有企业单方证据、哪些数据口径不一致、哪些问题需要二轮追问。
+   - 追问必须映射到“要证明什么、要什么材料、缺口影响什么投资判断”。
+   - 红旗清单优先服务投资经理和领导快速决策，完整报告排在后面。
+
+3. **机构自己的垂直尽调记忆库**
+   - 不把“有记忆”当作卖点本身。通用 agent 也能记住代码库、工作流和用户偏好；本包强调的是机构尽调记忆。
+   - 可沉淀的信息包括：机构过去做过哪些项目、哪些行业报告常用、哪些数据源可信、某类项目常见造假点、领导喜欢的报告结构、每次必问问题、红旗出现后的处理规则。
+   - 当运行环境支持长期记忆时，skill 应优先复用机构偏好、历史问题模板和行业红旗；当没有长期记忆时，也应在本次工作目录中保留可复用的机构记忆笔记。
 
 ## Included Skills
 
@@ -58,11 +77,14 @@ Typical inputs are:
 The skills are designed to produce:
 
 - `brief.md`: internal evidence extraction note when needed.
+- `claim_evidence_conclusion_matrix.md`: traceable claim -> evidence -> conclusion matrix.
+- `followup_questions.md`: missing, contradictory, single-sided, inconsistent, and second-round follow-up questions.
+- `institution_memory_notes.md`: reusable vertical diligence lessons when durable memory is unavailable.
 - `*.json`: structured payload for DOCX generation.
 - `商务尽调资料准备清单.docx`: formal five-column diligence checklist.
 - `04_prospectus_style_report_draft.md`: editable intermediate report.
 - `05_prospectus_style_report.docx`: formal four-module prospectus-style report.
-- Source registry, evidence gap matrix, visual asset inventory, and quality audit outputs.
+- Source registry, evidence gap matrix, visual asset inventory, red-flag list, and quality audit outputs.
 
 ## Feishu Interaction Contract
 

@@ -6,12 +6,19 @@ public sources.
 
 ## Goal
 
-Replicate the reference report's form and writing logic, not its facts.
+Replicate the reference report's form and writing logic. When the target project
+is the same project as the reference report, the reference can also be used as
+the factual master to calibrate the generated version; when the target differs,
+the reference remains a template only and must not supply facts for the new
+target.
 
 The new report should feel like the same class of deliverable: same chapter
-rhythm, similar paragraph density, similar table/figure density, same source
+rhythm, similar paragraph density, similar table/figure density, same front
+matter, same table of contents/definition rhythm where applicable, same source
 caption discipline, and the same investment-analysis posture. It must not fill
 unknown data with `XXX`, invented assumptions, or generic "need data" prose.
+The deliverable must read as a finished report prepared by the analyst, not as a
+description of how a skill used a reference document.
 
 ## Build A Style Blueprint First
 
@@ -28,8 +35,31 @@ Before drafting, create `01_formal_report_style_blueprint.md` with:
    appear;
 6. Word style notes: heading levels, table borders, chart caption placement,
    body paragraph length, and numbering.
+7. front-matter map: cover, `重要声明`, `重大事项提示`, `目录`, `释义`, and any
+   closing source or appendix-like section that the reference places before or
+   after the core chapters.
 
 Use this blueprint as the drafting checklist.
+
+## Front Matter And Author Stance
+
+If the reference report includes front matter, keep it in the generated report
+in the same order. `重要声明`, `重大事项提示`, `目录`, and `释义` are part of the
+formal report form in that case; do not delete them merely because they are not
+one of the four analytical modules.
+
+Do not write process language in the report body. Forbidden stance includes:
+
+- "本报告未使用正式报告中的资料";
+- "根据参考报告格式";
+- "由于只有PPT";
+- "此处按照模板";
+- "可补充/可能需要补充XXX".
+
+The report may state evidence boundaries only as substantive diligence
+judgments, for example "截至本报告出具日，项目尚未形成收入及正式订单" or "设备
+报价单、型号清单和产能测算底稿尚需作为出资前置核验资料". It should not expose
+the drafting workflow to the reader.
 
 ## Fill Or Omit Slots
 
@@ -61,6 +91,11 @@ The new report should do the same when data exists:
 
 Every chart/table needs a title and source marker. Do not paste a chart without
 explaining the source.
+
+When the reference report's visual language is known, reuse it: table grid
+weight, header shading, caption placement, figure numbering, source-note wording,
+page margins, body font, and heading sizes. A visually different DOCX is a
+failed replica even if the words are directionally correct.
 
 ## Body Writing Standard
 
