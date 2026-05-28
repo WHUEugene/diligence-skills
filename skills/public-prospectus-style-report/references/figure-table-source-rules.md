@@ -10,7 +10,7 @@ Use these classes deliberately:
 | Class | Examples | Source rule |
 |---|---|---|
 | Public data chart | market size, growth rate, shipment, listed-company revenue, capex benchmark | Redraw from verified public data. Caption must include source marker such as `资料来源：[A1][M2]`. |
-| Analyst logic diagram | industry chain, material route hierarchy, product position, customer validation path, milestone timeline | Draw from public sources plus project evidence. Caption must say `根据...整理` with markers. |
+| Analyst logic diagram | industry chain, material route hierarchy, product position, customer validation path, milestone timeline | Use only when the reference report has this slot or the source material gives concrete nodes/relationships. Caption must say `根据...整理` with markers. |
 | Project material image | product photo, sample, equipment, process photo from BP/PPT | Re-layout rather than paste raw slide. Caption must say `资料来源：项目商业计划书[B1]` or equivalent. |
 | Analyst calculation chart | project-side forecast vs serviceable market, investment ask vs recommended range, scenario revenue forecast | State formula/basis in text or table and cite the sources used. If assumptions are weak, mark `测算，待核验`. |
 
@@ -18,18 +18,24 @@ Do not use screenshots of PPT market charts as final evidence unless the origina
 public source has been checked. Use the PPT chart as a clue, then find the
 source data and redraw.
 
+Do not draw a figure merely to fill a visual slot. If the source does not provide
+data, a real photo/screenshot, or a concrete relationship worth visualizing,
+omit the figure and keep the evidence in prose or a table. Unsupported route
+boundary diagrams, generic industry-chain boxes, decorative process diagrams,
+and risk heatmaps should not appear in final DOCX reports.
+
 ## Minimum Figure Set For Industrial Project Reports
 
 When the task is a formal report rather than a quick memo, attempt these
 figures. If a figure cannot be supported, list it in `待核验事项` or the internal
 gap matrix.
 
-1. industry route / substitute technology map;
-2. industry chain and project position map;
+1. industry route / substitute technology map, only if backed by verified source structure;
+2. industry chain and project position map, only if it adds concrete report value;
 3. downstream demand or market-size chart;
 4. comparable-company or peer revenue/business-position chart;
 5. product form or product-position image;
-6. process flow chart;
+6. process flow chart, only if the source flow can be redrawn without crowded text;
 7. main equipment or production stage image;
 8. project-side forecast vs serviceable market / capacity absorption chart;
 9. investment ask vs staged recommendation chart;
@@ -74,9 +80,12 @@ put the marker in the relevant row/cell.
 
 - Use clean report charts: white background, muted blue/gray palette, simple
   bars/lines, readable labels, no decorative gradients.
-- Recreate PPT process diagrams in a consistent style instead of embedding
-  raw slide screenshots.
+- Recreate PPT process diagrams only when the source flow is concrete and the
+  final graphic stays legible. Otherwise use the text/table evidence and omit
+  the figure.
 - For images from project materials, crop and align them into a figure panel;
-  do not include surrounding slide chrome.
+  do not include surrounding slide chrome, nested card frames, internal figure
+  titles, internal source notes, or decorative labels. Let the DOCX caption carry
+  the title and source.
 - Never leave Markdown syntax such as `**合计**`, leading `-`, or raw image links
   visible in DOCX tables or captions.

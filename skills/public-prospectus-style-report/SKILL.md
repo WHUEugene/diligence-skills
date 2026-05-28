@@ -229,6 +229,11 @@ claim mapping, evidence matrix, cautious writing patterns, and quality checks.
      figure captions need local source markers, project-side images need
      `资料来源：项目商业计划书/访谈/项目材料`, and public data charts should be
      redrawn into a consistent report style rather than pasted as screenshots.
+     Do not create filler visuals: unsupported workflow diagrams, generic
+     industry-chain boxes, route-boundary sketches, decorative risk heatmaps, or
+     crowded process charts should be omitted. For project photos/screenshots,
+     use a clean crop/collage without nested cards, internal titles, or internal
+     source notes; the DOCX caption supplies the title and source.
    - Put `资料来源与待核验事项` as the final section, not at the front.
    - See [report-template.md](references/report-template.md).
 

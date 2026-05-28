@@ -80,6 +80,21 @@ def set_cell_borders(cell, color: str = "BFBFBF", size: str = "4") -> None:
         el.set(qn("w:color"), color)
 
 
+def set_cell_margins(cell, top: int = 90, start: int = 90, bottom: int = 90, end: int = 90) -> None:
+    tc_pr = cell._tc.get_or_add_tcPr()
+    tc_mar = tc_pr.find(qn("w:tcMar"))
+    if tc_mar is None:
+        tc_mar = OxmlElement("w:tcMar")
+        tc_pr.append(tc_mar)
+    for edge, value in (("top", top), ("start", start), ("bottom", bottom), ("end", end)):
+        el = tc_mar.find(qn(f"w:{edge}"))
+        if el is None:
+            el = OxmlElement(f"w:{edge}")
+            tc_mar.append(el)
+        el.set(qn("w:w"), str(value))
+        el.set(qn("w:type"), "dxa")
+
+
 def set_cell_shading(cell, fill: str = "FFFFFF") -> None:
     tc_pr = cell._tc.get_or_add_tcPr()
     shd = tc_pr.find(qn("w:shd"))
@@ -119,10 +134,11 @@ def set_cell_text(cell, text: str, bold: bool = False, header: bool = False) -> 
     cell.text = ""
     p = cell.paragraphs[0]
     p.paragraph_format.space_after = Pt(0)
-    p.paragraph_format.line_spacing = 1.12
-    add_inline_runs(p, text.strip(), size=9.2, bold=bold, color="FFFFFF" if header else "000000")
+    p.paragraph_format.line_spacing = 1.18
+    add_inline_runs(p, text.strip(), size=9.0 if not header else 9.2, bold=bold, color="FFFFFF" if header else "000000")
     cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    set_cell_borders(cell)
+    set_cell_margins(cell)
+    set_cell_borders(cell, color="9EADBD" if header else "BFC7D1", size="6" if header else "4")
     set_cell_shading(cell, "1F3A63" if header else "FFFFFF")
 
 
@@ -189,28 +205,74 @@ def replace_headers(doc: Document, header_text: str) -> None:
         paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
 
+def split_cover_title(title: str) -> tuple[str, str]:
+    suffix = "商业尽职调查报告"
+    clean_title = clean_inline(title)
+    if clean_title.endswith(suffix):
+        project_title = clean_title[: -len(suffix)].strip(" ：:-—")
+        return project_title or clean_title, suffix
+    return clean_title, suffix
+
+
+def filter_cover_metadata(title: str, metadata_lines: list[str] | None) -> list[str]:
+    if not metadata_lines:
+        return []
+    project_title, subtitle = split_cover_title(title)
+    filtered: list[str] = []
+    for raw in metadata_lines:
+        line = clean_inline(raw)
+        if not line:
+            continue
+        key = line.split("：", 1)[0].strip()
+        value = line.split("：", 1)[1].strip() if "：" in line else line
+        if key in {"项目", "项目名称"} and (value in project_title or project_title in value):
+            continue
+        if key in {"报告类型", "文件类型"} and subtitle in value:
+            continue
+        filtered.append(line)
+    return filtered
+
+
+def format_cover_project_title(project_title: str) -> str:
+    if "\n" in project_title or len(project_title) <= 18:
+        return project_title
+    for token in ("铝合金", "合作项目", "产业化"):
+        pos = project_title.find(token)
+        if pos > 6:
+            split_at = pos + len(token)
+            before = project_title[:split_at].strip()
+            after = project_title[split_at:].strip()
+            if before and after:
+                return before + "\n" + after
+    midpoint = len(project_title) // 2
+    return project_title[:midpoint].strip() + "\n" + project_title[midpoint:].strip()
+
+
 def add_cover_page(doc: Document, title: str, metadata_lines: list[str] | None = None) -> None:
-    for _ in range(8):
+    project_title, subtitle_text = split_cover_title(title)
+    display_title = format_cover_project_title(project_title)
+    for _ in range(6):
         doc.add_paragraph()
     title_p = doc.add_paragraph()
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_p.paragraph_format.space_after = Pt(34)
-    add_inline_runs(title_p, title, size=22, bold=True, font="黑体", color="17365D")
-    if metadata_lines:
-        for line in metadata_lines:
-            meta = doc.add_paragraph()
-            meta.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            meta.paragraph_format.left_indent = Cm(3.0)
-            meta.paragraph_format.space_after = Pt(10)
-            add_inline_runs(meta, line, size=12, font="宋体")
-    else:
-        subtitle = doc.add_paragraph()
-        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        subtitle.paragraph_format.space_after = Pt(160)
-        add_inline_runs(subtitle, "商业尽职调查报告", size=20, bold=True, font="黑体")
+    title_p.paragraph_format.space_after = Pt(58)
+    title_p.paragraph_format.line_spacing = 1.25
+    add_inline_runs(title_p, display_title, size=24, bold=True, font="黑体", color="17365D")
+
+    subtitle = doc.add_paragraph()
+    subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    subtitle.paragraph_format.space_after = Pt(112)
+    add_inline_runs(subtitle, subtitle_text, size=24, bold=True, font="黑体")
+
+    cover_meta = filter_cover_metadata(title, metadata_lines)
+    if not cover_meta:
+        cover_meta = ["报告日期：2026 年 5 月"]
+    for line in cover_meta:
         meta = doc.add_paragraph()
-        meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        add_inline_runs(meta, "报告日期：2026 年 5 月", size=11, font="宋体")
+        meta.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        meta.paragraph_format.left_indent = Cm(3.0)
+        meta.paragraph_format.space_after = Pt(9)
+        add_inline_runs(meta, line, size=12, font="宋体")
     doc.add_page_break()
 
 

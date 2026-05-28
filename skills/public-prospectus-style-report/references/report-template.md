@@ -100,11 +100,11 @@ Rules:
   it instead of writing a negative placeholder.
 - Use charts/figures when the source data supports them, especially for product
   revenue composition, investment composition, market demand, or peer comparison.
-  For industrial projects, also attempt route/alternative-material maps,
-  industry-chain/project-position diagrams, product image panels, process flow
-  charts, equipment panels, serviceable-market comparison charts, and
-  investment-scale comparison charts. See `figure-table-source-rules.md` for
-  caption/source rules.
+  For industrial projects, attempt route maps, industry-chain diagrams, process
+  charts, and risk visuals only when the source gives concrete data or a clear
+  relationship that will remain readable in Word. Otherwise omit them. Prefer
+  real project photos/screenshots and data-backed revenue/investment/market
+  charts. See `figure-table-source-rules.md` for caption/source rules.
 - Place sources and evidence gaps only in the final section.
 - The formal deliverable should be generated as `.docx`; this Markdown is only
   the editable intermediate.
