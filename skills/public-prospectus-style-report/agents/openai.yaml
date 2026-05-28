@@ -1,0 +1,4 @@
+interface:
+  display_name: "Four-Module Prospectus Report"
+  short_description: "Draft no-placeholder four-module diligence reports with sourced figures."
+  default_prompt: "Classify the input evidence, build PPT/public-source gap matrices when needed, select comparable prospectuses, create a source registry, and draft a four-module prospectus-style DOCX report with cited figures, tables, exact verification gaps, and no placeholder or vague future-data prose."
