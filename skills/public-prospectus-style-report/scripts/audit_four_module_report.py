@@ -45,6 +45,22 @@ STRICT_SUBHEADINGS = {
     "四、投资方案与风控措施": ["投资判断", "分期出资", "先决条件", "交易条款", "否决项"],
 }
 
+REFERENCE_REQUIRED_H2_PATTERNS = [
+    "重要声明",
+    "重大事项提示",
+    "目录",
+    "释义",
+    "第一章 项目概览",
+    "第二章 行业研究",
+    "第三章 出资主体与项目主体基本情况",
+    "第四章 公司业务与技术",
+    "第五章 同业竞争、关联交易与集团协同",
+    "第六章 财务分析与财务预测",
+    "第七章 募集资金运用与落地匹配度",
+    "第八章 风险因素与风险控制",
+    "第九章 尽调结论与投资建议",
+]
+
 CITATION_RE = re.compile(r"\[[A-Z]{1,5}\d+\]")
 IMAGE_RE = re.compile(r"^!\[(?P<alt>.*)\]\((?P<path>[^)]+)\)\s*$")
 TABLE_ROW_RE = re.compile(r"^\s*\|.*\|\s*$")
@@ -101,6 +117,13 @@ def audit(path: Path, strict: bool = False, reference_replica: bool = False) -> 
             for forbidden in FORBIDDEN_HEADINGS:
                 if forbidden in title:
                     errors.append(f"Forbidden heading at line {lineno}: {title}")
+    elif strict:
+        joined_h2 = "\n".join(actual)
+        for pattern in REFERENCE_REQUIRED_H2_PATTERNS:
+            if pattern not in joined_h2:
+                errors.append(f"Reference-replica report missing required H2 pattern: {pattern}")
+        if not any("资料来源" in title or "附录" in title for title in actual):
+            errors.append("Reference-replica report missing final source/appendix section")
 
     for lineno, line in enumerate(text.splitlines(), 1):
         for forbidden in FORBIDDEN_BODY_TERMS:

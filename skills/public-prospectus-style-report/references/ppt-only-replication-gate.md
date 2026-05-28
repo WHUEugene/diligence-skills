@@ -22,6 +22,14 @@ Create these before drafting the report:
      evidence.
    - For each chapter, table, and figure, mark:
      `可直接复刻`, `可部分复刻`, `需外部公开搜索`, `需项目方补充`, or `不能复刻`.
+4. `00_investment_decision_matrices.json` plus workbook exports
+   - `01_PPT主张清单.xlsx`
+   - `02_尽调问题与资料索取清单.xlsx`
+   - `03_证据矩阵.xlsx`
+   - `04_风险与前置条件清单.xlsx`
+   - These matrices convert project-side promotion into investment-decision
+     structure. Use `investment-decision-report-contracts.md` for fields and
+     `scripts/build_investment_decision_workbooks.py` for export.
 
 ## Evidence Boundary
 
@@ -71,7 +79,7 @@ At the top of `00_replication_gap_matrix.md`, include:
 
 ## Drafting Rule
 
-In the draft, use these labels when evidence is weak:
+In working files, use these labels when evidence is weak:
 
 - `[PPT事实]`: directly visible in the deck.
 - `[PPT可推断]`: a conservative inference from visible deck content.
@@ -80,5 +88,7 @@ In the draft, use these labels when evidence is weak:
 - `[需项目方补充]`: customer, order, testing, IP, finance, subject, capex, or legal
   proof that only the project side can provide.
 
-Do not hide these labels only in the final source table. Put them near the
-paragraph, table, or figure that depends on the evidence.
+The final report should not expose working labels such as `[PPT事实]` or
+`[缺资料]`. Convert weak evidence into formal report language: project-side口径,
+bounded conclusion, condition precedent, staged funding gate, or final
+verification row.

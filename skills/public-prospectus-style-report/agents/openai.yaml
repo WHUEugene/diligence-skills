@@ -1,4 +1,4 @@
 interface:
-  display_name: "Four-Module Prospectus Report"
-  short_description: "Draft no-placeholder four-module diligence reports with sourced figures."
-  default_prompt: "Classify the input evidence, build PPT/public-source gap matrices when needed, select comparable prospectuses, create a source registry, and draft a four-module prospectus-style DOCX report with cited figures, tables, exact verification gaps, and no placeholder or vague future-data prose."
+  display_name: "Investment Diligence Report"
+  short_description: "Turn BP/PPT claims into formal investment-decision diligence reports."
+  default_prompt: "Extract project-side claims, build the due-diligence request list, evidence matrix, and risk/condition matrix, then reorganize the material into a formal commercial diligence DOCX with front matter, nine investment-decision chapters, sourced tables/figures, cautious conclusions, and transaction-control recommendations."

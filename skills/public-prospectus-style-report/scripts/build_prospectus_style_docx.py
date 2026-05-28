@@ -95,7 +95,14 @@ def clean_inline(text: str) -> str:
     return text.strip()
 
 
-def add_inline_runs(paragraph, text: str, size: float = 10.5, bold: bool = False, font: str = "宋体") -> None:
+def add_inline_runs(
+    paragraph,
+    text: str,
+    size: float = 10.5,
+    bold: bool = False,
+    font: str = "宋体",
+    color: str = "000000",
+) -> None:
     """Add body text and render source markers such as [P1] as small superscript."""
 
     for part in CITATION_RE.split(clean_inline(text)):
@@ -103,20 +110,20 @@ def add_inline_runs(paragraph, text: str, size: float = 10.5, bold: bool = False
             continue
         is_citation = bool(CITATION_RE.fullmatch(part))
         run = paragraph.add_run(part)
-        set_run_font(run, size=7.5 if is_citation else size, bold=bold and not is_citation, font=font)
+        set_run_font(run, size=7.5 if is_citation else size, bold=bold and not is_citation, font=font, color=color)
         if is_citation:
             run.font.superscript = True
 
 
-def set_cell_text(cell, text: str, bold: bool = False) -> None:
+def set_cell_text(cell, text: str, bold: bool = False, header: bool = False) -> None:
     cell.text = ""
     p = cell.paragraphs[0]
     p.paragraph_format.space_after = Pt(0)
     p.paragraph_format.line_spacing = 1.12
-    add_inline_runs(p, text.strip(), size=9.2, bold=bold)
+    add_inline_runs(p, text.strip(), size=9.2, bold=bold, color="FFFFFF" if header else "000000")
     cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
     set_cell_borders(cell)
-    set_cell_shading(cell, "FFFFFF")
+    set_cell_shading(cell, "1F3A63" if header else "FFFFFF")
 
 
 def is_table_start(lines: list[str], idx: int) -> bool:
@@ -137,7 +144,7 @@ def parse_table(lines: list[str], idx: int) -> tuple[list[list[str]], int]:
     return rows, idx
 
 
-def add_table(doc: Document, rows: list[list[str]]) -> None:
+def add_table(doc: Document, rows: list[list[str]], reference_replica: bool = False) -> None:
     if not rows:
         return
     col_count = max(len(r) for r in rows)
@@ -147,7 +154,7 @@ def add_table(doc: Document, rows: list[list[str]]) -> None:
     for r_idx, row in enumerate(rows):
         for c_idx in range(col_count):
             text = row[c_idx] if c_idx < len(row) else ""
-            set_cell_text(table.cell(r_idx, c_idx), text, bold=(r_idx == 0))
+            set_cell_text(table.cell(r_idx, c_idx), text, bold=(r_idx == 0), header=reference_replica and r_idx == 0)
     doc.add_paragraph()
 
 
@@ -180,6 +187,40 @@ def replace_headers(doc: Document, header_text: str) -> None:
         run = paragraph.add_run(header_text)
         set_run_font(run, size=9, font="宋体", color="808080")
         paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+
+def add_cover_page(doc: Document, title: str, metadata_lines: list[str] | None = None) -> None:
+    for _ in range(8):
+        doc.add_paragraph()
+    title_p = doc.add_paragraph()
+    title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    title_p.paragraph_format.space_after = Pt(34)
+    add_inline_runs(title_p, title, size=22, bold=True, font="黑体", color="17365D")
+    if metadata_lines:
+        for line in metadata_lines:
+            meta = doc.add_paragraph()
+            meta.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            meta.paragraph_format.left_indent = Cm(3.0)
+            meta.paragraph_format.space_after = Pt(10)
+            add_inline_runs(meta, line, size=12, font="宋体")
+    else:
+        subtitle = doc.add_paragraph()
+        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        subtitle.paragraph_format.space_after = Pt(160)
+        add_inline_runs(subtitle, "商业尽职调查报告", size=20, bold=True, font="黑体")
+        meta = doc.add_paragraph()
+        meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        add_inline_runs(meta, "报告日期：2026 年 5 月", size=11, font="宋体")
+    doc.add_page_break()
+
+
+def should_start_new_page(title: str, level: int, reference_replica: bool) -> bool:
+    if not reference_replica or level != 2:
+        return False
+    compact = title.replace(" ", "")
+    if compact in {"重要声明", "重大事项提示", "目录", "释义"}:
+        return True
+    return bool(re.match(r"^第[一二三四五六七八九十]+章", compact))
 
 
 def add_heading(doc: Document, text: str, level: int, allow_frontmatter: bool = False) -> None:
@@ -289,28 +330,69 @@ def build_docx(
         section.right_margin = Cm(2.4)
 
     idx = 0
+    cover_done = False
+    just_inserted_page_break = False
     while idx < len(lines):
         raw = lines[idx]
         line = raw.strip()
         if not line:
             idx += 1
             continue
+        if line == "<!-- PAGEBREAK -->":
+            if doc.paragraphs and not just_inserted_page_break:
+                doc.add_page_break()
+                just_inserted_page_break = True
+            idx += 1
+            continue
 
         heading = re.match(r"^(#{1,6})\s+(.+)$", line)
         if heading:
-            add_heading(doc, heading.group(2), len(heading.group(1)), allow_frontmatter=reference_replica)
+            heading_text = heading.group(2).strip()
+            heading_level = len(heading.group(1))
+            if reference_replica and heading_level == 1 and not cover_done:
+                cover_meta: list[str] = []
+                lookahead = idx + 1
+                while lookahead < len(lines):
+                    candidate = lines[lookahead].strip()
+                    if not candidate:
+                        lookahead += 1
+                        continue
+                    if candidate == "<!-- PAGEBREAK -->":
+                        lookahead += 1
+                        break
+                    if candidate.startswith("#"):
+                        break
+                    if candidate.startswith("|"):
+                        cells = [cell.strip() for cell in candidate.strip("|").split("|")]
+                        if len(cells) >= 2 and not all(set(cell) <= {"-"} for cell in cells if cell):
+                            cover_meta.append(f"{cells[0]}：{cells[1]}")
+                    else:
+                        cover_meta.append(clean_inline(candidate))
+                    lookahead += 1
+                add_cover_page(doc, heading_text, cover_meta)
+                cover_done = True
+                just_inserted_page_break = True
+                idx = lookahead
+                continue
+            if should_start_new_page(heading_text, heading_level, reference_replica) and doc.paragraphs and not just_inserted_page_break:
+                doc.add_page_break()
+                just_inserted_page_break = True
+            add_heading(doc, heading_text, heading_level, allow_frontmatter=reference_replica)
+            just_inserted_page_break = False
             idx += 1
             continue
 
         image = IMAGE_RE.match(line)
         if image:
             add_image(doc, base_dir, image.group(1), image.group(2))
+            just_inserted_page_break = False
             idx += 1
             continue
 
         if is_table_start(lines, idx):
             table_rows, idx = parse_table(lines, idx)
-            add_table(doc, table_rows)
+            add_table(doc, table_rows, reference_replica=reference_replica)
+            just_inserted_page_break = False
             continue
 
         list_match = re.match(r"^(\d+\.\s+|[-*]\s+)(.+)$", line)
@@ -323,6 +405,7 @@ def build_docx(
             prefix = "• " if marker.strip() in {"-", "*"} else marker
             content = list_match.group(2)
         add_inline_runs(p, prefix + content, size=10.5)
+        just_inserted_page_break = False
         idx += 1
 
     output.parent.mkdir(parents=True, exist_ok=True)

@@ -12,6 +12,12 @@ the factual master to calibrate the generated version; when the target differs,
 the reference remains a template only and must not supply facts for the new
 target.
 
+For commercial diligence reports, the writing logic is an investment-decision
+chain, not a PPT rewrite: project-side claim -> evidence verification -> narrowed
+口径 -> risk judgment -> investment recommendation or transaction control.
+Before drafting, create the four working matrices defined in
+`investment-decision-report-contracts.md`.
+
 The new report should feel like the same class of deliverable: same chapter
 rhythm, similar paragraph density, similar table/figure density, same front
 matter, same table of contents/definition rhythm where applicable, same source
@@ -38,6 +44,9 @@ Before drafting, create `01_formal_report_style_blueprint.md` with:
 7. front-matter map: cover, `重要声明`, `重大事项提示`, `目录`, `释义`, and any
    closing source or appendix-like section that the reference places before or
    after the core chapters.
+8. chapter contract map: for each chapter, identify its function, input
+   evidence, decisions answered, required tables/figures, and forbidden
+   overclaims.
 
 Use this blueprint as the drafting checklist.
 
@@ -76,6 +85,12 @@ For each paragraph/table/figure slot in the reference report:
   verification row.
 
 Do not use the missing slot as a place to write "可能需要补充资料".
+
+In the first pass, do not write body prose directly from PPT order. Build a
+`PPT主张清单` and assign each claim to the chapter where it affects the decision.
+Large market claims usually belong in industry-boundary and serviceable-market
+discussion; large investment/funding requests usually belong in finance,
+fund-use, risk-control and final recommendation chapters.
 
 ## Figure And Table Replication
 

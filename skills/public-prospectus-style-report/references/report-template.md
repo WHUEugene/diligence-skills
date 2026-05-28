@@ -75,6 +75,11 @@ Rules:
 - If a formal reference report is available, first create a style blueprint and
   imitate its section rhythm, paragraph roles, table/figure density, captions,
   and source-marker placement. Replicate the form, not unsupported facts.
+- If the task is a formal commercial diligence report, do not use this
+  four-module template as the visible structure. Use
+  `investment-decision-report-contracts.md`: create the four working matrices,
+  then generate the fixed front matter and nine正文 chapters. The four modules
+  remain the underlying analysis logic, not the visible report目录.
 - Do not add standalone sections titled `重要提示`, `重大事项提示`, `重要声明`,
   `报告边界`, `使用说明`, or `附录`.
 - Do not add a `免责声明`. Public-data limits belong in `待核验事项清单`.

@@ -10,10 +10,10 @@ description: >-
 
 # Public Prospectus-Style Report
 
-Use this skill to build a **prospectus-style public information report**. It
-borrows the structure and disclosure logic of real IPO prospectuses, but it is
-not a legal prospectus and must not pretend to have issuer, sponsor, auditor, or
-lawyer verification.
+Use this skill to build a **commercial diligence report in a prospectus-like
+formal style**. The core task is not to rewrite a BP/PPT into Word. The task is
+to extract the project-side claims, verify or narrow them with evidence, and
+reorganize them into an investment-decision narrative.
 
 ## Core Principle
 
@@ -32,6 +32,21 @@ The finished report should look and read like the reference formal report, not
 like a data-request memo. Evidence gaps control what facts can be stated; they
 do not justify `XXX`, filler paragraphs, or repeated "need more data" prose in
 the body.
+
+## Investment-Decision Narrative
+
+Every BP/PPT claim must pass through this chain before it appears in the
+report:
+
+```text
+项目方主张 -> 证据验证 -> 口径压缩 -> 风险判断 -> 投资建议/交易条款
+```
+
+For example, a PPT claim such as `总投资15亿元、达产产值15.25亿元` should not
+be copied as the report's own conclusion. The report should identify it as
+`项目方自报预测`, test it against order, customer, capacity, capex, equipment and
+financial evidence, then decide whether it supports a staged investment,
+condition precedent, veto item, or no-current-support conclusion.
 
 When the user provides a formal reference report and asks to imitate it, the
 reference report becomes the structural and visual master. Preserve its front
@@ -70,6 +85,11 @@ new-project evidence, public sources, and comparable-company filings. It must
 not carry over facts from the old report unless the old report is about the
 same project and is explicitly being used as the factual master.
 
+When the reference is a commercial diligence report, also read
+[investment-decision-report-contracts.md](references/investment-decision-report-contracts.md).
+That reference defines the required fixed structure, chapter contracts, PPT
+claim mapping, evidence matrix, cautious writing patterns, and quality checks.
+
 ## Workflow
 
 0. **Classify the input evidence first**
@@ -82,6 +102,21 @@ same project and is explicitly being used as the factual master.
      valuation, go/no-go conclusion, customer validation conclusion, or
      independent revenue forecast. Convert those items into missing evidence,
      follow-up requests, or conditions precedent.
+
+0c. **Build investment-decision working matrices**
+   - Before drafting the body, create four working matrices:
+     1. `PPT主张清单`;
+     2. `尽调问题与资料索取清单`;
+     3. `证据矩阵`;
+     4. `风险与前置条件清单`.
+   - These are not optional when the input is a BP/PPT/project PDF or when the
+     user asks for a formal diligence report. Use the fields and rules in
+     [investment-decision-report-contracts.md](references/investment-decision-report-contracts.md).
+   - If code execution is available, write the matrices as
+     `00_investment_decision_matrices.json` and run
+     `scripts/build_investment_decision_workbooks.py` to create the `.xlsx`
+     files. These workbooks are the guardrail that prevents PPT claims from
+     being copied directly into the report.
 
 0a. **If a formal reference report is available, build its style blueprint**
    - Extract the reference report's chapter order, paragraph roles, table/figure
@@ -121,11 +156,16 @@ same project and is explicitly being used as the factual master.
      `scripts/harvest_prospectus.py` to download or scan it, extract text, and
      update the source registry.
 
-3. **Map reference chapters to the four-module output**
+3. **Map reference chapters to the output structure**
    - Extract the table of contents and section-level structure.
    - Record which chapters are common and which are sector-specific.
    - See [prospectus-format.md](references/prospectus-format.md) and
      [module-to-prospectus-map.md](references/module-to-prospectus-map.md).
+   - If a formal commercial diligence report is being replicated, use its
+     nine-chapter investment-decision structure rather than the four-module
+     visible structure. The leader's four modules remain the hidden analytical
+     logic: industry situation, project business, project advantages/risks in
+     the industry, investment plan and risk control.
 
 4. **Map data availability and evidence grade**
    - For every prospectus-style chapter, mark what can be filled from public
@@ -155,6 +195,16 @@ same project and is explicitly being used as the factual master.
      logic inside the leader's four modules. Do not expand the output into a
      full IPO prospectus chapter list unless the user explicitly asks for a
      full-chapter simulation or provides a formal report to replicate.
+   - In formal commercial diligence mode, use the fixed structure:
+     `封面`, `重要声明`, `重大事项提示`, `目录`, `释义`, `第一章 项目概览`,
+     `第二章 行业研究`, `第三章 出资主体与项目主体基本情况`,
+     `第四章 公司业务与技术`, `第五章 同业竞争、关联交易与集团协同`,
+     `第六章 财务分析与财务预测`, `第七章 募集资金运用与落地匹配度`,
+     `第八章 风险因素与风险控制`, `第九章 尽调结论与投资建议`, and
+     source/appendix material if the reference report uses it.
+   - Each formal chapter must follow a chapter contract: function, inputs,
+     questions answered, required table/figure, and forbidden overclaiming.
+     Do not treat the heading list as enough.
    - Mark every target-specific claim with source type and confidence.
    - Put a source marker next to every quantitative claim, technical parameter,
      market size, growth rate, customer concentration, investment amount, or
@@ -213,6 +263,12 @@ same project and is explicitly being used as the factual master.
      investment judgment.
    - Never include a `免责声明` paragraph. If the report has public-data limits,
      express them as `待核验事项` tied to the relevant evidence gap.
+   - In formal commercial diligence mode, verify that the report has converted
+     project-side promotion into investment-decision language: material claims
+     appear in the relevant chapter, have evidence strength, have a narrowed
+     conclusion, and where needed become a condition precedent, staged-payment
+     trigger, repurchase/valuation-adjustment item, information-rights item, or
+     veto item.
    - Before DOCX generation, check that Markdown syntax does not remain visible
      in rendered tables, bullets, captions, or paragraphs.
    - Before DOCX generation in four-module mode, run
@@ -238,6 +294,11 @@ prospectus_style_runs/<target_slug>/
   00_input_evidence_index.md
   00_visual_assets_inventory.md
   00_replication_gap_matrix.md
+  00_investment_decision_matrices.json
+  01_PPT主张清单.xlsx
+  02_尽调问题与资料索取清单.xlsx
+  03_证据矩阵.xlsx
+  04_风险与前置条件清单.xlsx
   01_formal_report_style_blueprint.md
   01_reference_prospectus_format.md
   02_public_data_fit_map.md
