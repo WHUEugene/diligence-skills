@@ -42,6 +42,34 @@ report preparer's point of view; never mention the prompt, the skill, the act of
 copying a reference report, or phrases such as "不使用正式报告中的资料" inside the
 deliverable.
 
+## Formal Master-Template Mode
+
+For recurring project reports, first convert a good formal report into a master
+template package. The package is not a frozen text file; it is a reusable
+report skeleton made of:
+
+- front-matter order;
+- table of contents rhythm;
+- chapter and subsection slots;
+- table/figure slots and source-note rules;
+- Word style master DOCX;
+- evidence requirements for each slot.
+
+Use `scripts/extract_reference_report_template.py` to create the package:
+
+```bash
+python scripts/extract_reference_report_template.py \
+  /path/to/reference_report.docx \
+  --output-dir prospectus_style_runs/<target_slug>/master_template
+```
+
+Then process each new PPT/PDF/BP with
+`scripts/extract_project_pdf_evidence.py` or the equivalent PPT page-index
+workflow before writing. The new project's report fills the template slots with
+new-project evidence, public sources, and comparable-company filings. It must
+not carry over facts from the old report unless the old report is about the
+same project and is explicitly being used as the factual master.
+
 ## Workflow
 
 0. **Classify the input evidence first**
@@ -69,6 +97,15 @@ deliverable.
      public sources. If a slot has no evidence, omit or merge it instead of
      writing a blank, `XXX`, or "可能需要..." paragraph.
    - See [formal-report-replication-rules.md](references/formal-report-replication-rules.md).
+
+0b. **If a reusable mother template is needed**
+   - Run `scripts/extract_reference_report_template.py` on the reference DOCX.
+   - Use the generated `formal_report_master_template.json`,
+     `formal_report_master_template.md`, and `formal_report_style_master.docx`
+     as the template package for future projects.
+   - For each new project PDF/PPT, create the required page-level evidence
+     index, visual asset inventory, and replication gap matrix before drafting.
+     For PDFs, run `scripts/extract_project_pdf_evidence.py`.
 
 1. **Select comparable companies**
    - Build the peer list by product, process, downstream customers, and

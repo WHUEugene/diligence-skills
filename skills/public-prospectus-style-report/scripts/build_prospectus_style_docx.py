@@ -3,8 +3,10 @@
 
 This generator intentionally supports a compact subset of Markdown used by the
 public-prospectus-style-report skill: headings, paragraphs, ordered/unordered
-lists, and simple pipe tables. It rejects meta/preface sections that should not
-appear in the formal deliverable.
+lists, images, and simple pipe tables. In default mode it enforces the leader's
+four-module structure. In reference-replica mode it can use a formal report DOCX
+as the style master and allows front matter such as 重要声明, 重大事项提示, 目录,
+and 释义.
 """
 
 from __future__ import annotations
@@ -149,9 +151,55 @@ def add_table(doc: Document, rows: list[list[str]]) -> None:
     doc.add_paragraph()
 
 
-def add_heading(doc: Document, text: str, level: int) -> None:
-    if any(pattern in text for pattern in FORBIDDEN_HEADING_PATTERNS):
+def clear_document_body(doc: Document) -> None:
+    body = doc._body._element
+    for child in list(body):
+        if child.tag.endswith("}sectPr"):
+            continue
+        body.remove(child)
+
+
+def extract_markdown_title(markdown: str) -> str:
+    for line in markdown.splitlines():
+        match = re.match(r"^#\s+(.+?)\s*$", line.strip())
+        if match:
+            return clean_inline(match.group(1))
+    return ""
+
+
+def replace_headers(doc: Document, header_text: str) -> None:
+    if not header_text:
+        return
+    for section in doc.sections:
+        header = section.header
+        if not header.paragraphs:
+            paragraph = header.add_paragraph()
+        else:
+            paragraph = header.paragraphs[0]
+        paragraph.text = ""
+        run = paragraph.add_run(header_text)
+        set_run_font(run, size=9, font="宋体", color="808080")
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+
+def add_heading(doc: Document, text: str, level: int, allow_frontmatter: bool = False) -> None:
+    if not allow_frontmatter and any(pattern in text for pattern in FORBIDDEN_HEADING_PATTERNS):
         raise ValueError(f"Forbidden formal-report heading: {text}")
+    if allow_frontmatter:
+        style_name = f"Heading {min(level, 3)}" if level <= 3 else "Heading 3"
+        try:
+            p = doc.add_paragraph(style=style_name)
+        except KeyError:
+            p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(0 if level == 1 else 8)
+        p.paragraph_format.space_after = Pt(12 if level == 1 else 6)
+        if not p.runs:
+            run = p.add_run(text)
+            run.font.name = "宋体"
+            run._element.rPr.rFonts.set(qn("w:eastAsia"), "宋体")
+        else:
+            p.runs[0].text = text
+        return
     if level == 1:
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -216,17 +264,29 @@ def audit_four_module_headings(markdown: str) -> None:
         )
 
 
-def build_docx(markdown: str, output: Path, require_four_module: bool = True, base_dir: Path | None = None) -> None:
+def build_docx(
+    markdown: str,
+    output: Path,
+    require_four_module: bool = True,
+    base_dir: Path | None = None,
+    template_docx: Path | None = None,
+    reference_replica: bool = False,
+) -> None:
     if require_four_module:
         audit_four_module_headings(markdown)
     base_dir = base_dir or Path.cwd()
     lines = markdown.splitlines()
-    doc = Document()
-    section = doc.sections[0]
-    section.top_margin = Cm(2.5)
-    section.bottom_margin = Cm(2.2)
-    section.left_margin = Cm(2.6)
-    section.right_margin = Cm(2.4)
+    if template_docx:
+        doc = Document(str(template_docx))
+        clear_document_body(doc)
+        replace_headers(doc, extract_markdown_title(markdown))
+    else:
+        doc = Document()
+        section = doc.sections[0]
+        section.top_margin = Cm(2.5)
+        section.bottom_margin = Cm(2.2)
+        section.left_margin = Cm(2.6)
+        section.right_margin = Cm(2.4)
 
     idx = 0
     while idx < len(lines):
@@ -238,7 +298,7 @@ def build_docx(markdown: str, output: Path, require_four_module: bool = True, ba
 
         heading = re.match(r"^(#{1,6})\s+(.+)$", line)
         if heading:
-            add_heading(doc, heading.group(2), len(heading.group(1)))
+            add_heading(doc, heading.group(2), len(heading.group(1)), allow_frontmatter=reference_replica)
             idx += 1
             continue
 
@@ -278,13 +338,24 @@ def main() -> None:
         action="store_true",
         help="Skip the leader four-module structure gate. Use only for explicit full-prospectus simulations.",
     )
+    parser.add_argument(
+        "--reference-replica",
+        action="store_true",
+        help="Use full reference-report structure/front matter instead of four-module enforcement.",
+    )
+    parser.add_argument(
+        "--template-docx",
+        help="Reference DOCX to use as style master. The body is cleared before writing the new report.",
+    )
     args = parser.parse_args()
     input_path = Path(args.input)
     build_docx(
         input_path.read_text(encoding="utf-8"),
         Path(args.output),
-        require_four_module=not args.allow_non_four_module,
+        require_four_module=not (args.allow_non_four_module or args.reference_replica),
         base_dir=input_path.parent,
+        template_docx=Path(args.template_docx) if args.template_docx else None,
+        reference_replica=args.reference_replica,
     )
     print(args.output)
 

@@ -156,7 +156,7 @@ def extract_file(raw: Path, extracted_dir: Path, force: bool = False) -> dict:
     suffix = raw.suffix.lower()
     if suffix == ".pdf":
         return extract_pdf(raw, out, force=force)
-    if suffix in (".html", ".htm"):
+    if suffix in (".html", ".htm", ".php", ".phtml"):
         return extract_html(raw, out, force=force)
     return {"method": "unsupported", "chars": 0, "path": str(out), "error": f"Unsupported suffix {raw.suffix}"}
 
@@ -222,7 +222,7 @@ def scan_local(args: argparse.Namespace) -> dict:
     raw_dir = Path(args.raw_dir)
     extracted_dir = Path(args.extracted_dir)
     registry = Path(args.registry)
-    files = sorted(p for p in raw_dir.iterdir() if p.suffix.lower() in (".pdf", ".html", ".htm"))
+    files = sorted(p for p in raw_dir.iterdir() if p.suffix.lower() in (".pdf", ".html", ".htm", ".php", ".phtml"))
     records = []
     for raw_path in files:
         source_id = raw_path.stem.split("_", 1)[0]
